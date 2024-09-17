@@ -1,6 +1,8 @@
 from datetime import timedelta
 import logging
 import traceback
+import os
+from dotenv import load_dotenv
 
 import couchbase
 from couchbase.exceptions import CouchbaseException
@@ -19,13 +21,16 @@ logging.basicConfig(filename='exampleRYOW.log',
 logger = logging.getLogger()
 couchbase.configure_logging(logger.name, level=logger.level) 
 
+# Load the .env file
+env_loaded = load_dotenv()
+
 # Configuration variables
-endpoint = "couchbases://cb.qp6j2fqsqf9t5hd6.cloud.couchbase.com"
-username = "techuser"
-password = "techU$er01"
-bucket_name = "travel-sample"
-scope_name = "inventory"
-collection_name = "airline"
+endpoint = os.getenv('DB_CONN_STR')
+username = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
+bucket_name = os.getenv('DB_BUCKET')
+scope_name = os.getenv('DB_SCOPE')
+collection_name = os.getenv('DB_COLLECTION')
 
 # Key will equal: "airline_8091"
 key = "airline_8091"
