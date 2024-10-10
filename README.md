@@ -1,4 +1,4 @@
-# ACID Transactions in Couchbase Showcase & Documemtation
+# ACID Transactions in Couchbase Showcase & Documentation
 
 Demos, Documentations &amp; Links for Couchbase ACID Transactions and Queries with different consistency levels
 
