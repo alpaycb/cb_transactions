@@ -26,7 +26,7 @@ docker run -d --name db3 couchbase:enterprise-7.6.3
 Clone the git repository:
 
 ```sh
-git clone https://github.com/grbade/cb_graphql_rest_demo.git
+git clone https://github.com/alpaycb/cb_transactions.git
 ```
 
 Open the source codes in your favorite IDE (VScode, etc.)
@@ -37,12 +37,12 @@ In order to install the dependencies in a dedicated folder, you need to create a
 
 For this purpose, change the directory on which Python virtual environment will be created and run the following command
 
-#### On Windows
+#### On Windows (with PowerShell)
 
 ```sh
 cd path\to\your\project
 python -m venv acidDemo
-acidDemo\Scripts\activate
+.\acidDemo\Scripts\Activate.ps1
 ```
 
 #### On MAC
