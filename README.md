@@ -75,13 +75,21 @@ python3 -m pip install couchbase==4.3.1
 ```
 
 
-## Running the Scripts
+## Running the Queries & Scripts
+
+### Queries in Query Workbench
+
+### Transactions in general with Python SDK
 
 ### Eventual Consistency
 
 Eventual consistency in Couchbase refers to a consistency model where updates to the database will eventually propagate to all nodes, but not necessarily immediately. This means that there might be a short period during which different nodes have slightly different data. However, given enough time, all nodes will converge to the same state.
 
 In Couchbase, this model is particularly useful for ensuring high availability and partition tolerance, as described by the CAP theorem1. Couchbase allows for flexibility in consistency levels, enabling it to switch between strong consistency and eventual consistency based on the application’s needs2. This is achieved through asynchronous replication, which ensures that data is eventually consistent across the cluster while maintaining high performance and low latency
+
+### Transactions with ReqPlus
+
+### Transactions for RYOW
 
 ## FAQ
 
@@ -112,6 +120,9 @@ Transactions: https://docs.couchbase.com/server/current/learn/data/transactions.
 Transaction Concepts: https://docs.couchbase.com/python-sdk/current/concept-docs/transactions.html
 
 Using Transactions with Python SDK (How-To): https://docs.couchbase.com/python-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html
+
+Transactions Simulator: https://transactions.couchbase.com/
+
 
 
 
