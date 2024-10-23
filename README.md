@@ -4,6 +4,7 @@ Demos, Documentations &amp; Links for Couchbase ACID Transactions and Queries wi
 
 This demo consists of following parts:
 - We need to create a Couchbase cluster with at least three nodes incl. Data, Query, Index & Search services
+  - We'll have Docker Container and Capella
 - Then we'll create our Python virtual environment (optional) and install Couchbase Python SDK components
 - We're now ready to adjust the connection strings in the Python codes
 - We'll then run individual Python scripts to observe the outcomes of eventual consistency, strong consistency, ACID transactions and RYOW approach
@@ -79,6 +80,14 @@ python3 -m pip install couchbase==4.3.1
 
 ### Queries in Query Workbench
 
+## Links
+* SQL++ Support for Couchbase Transactions EE: https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/transactions.html
+* SQL++ Support for Couchbase Transactions Capella: https://docs.couchbase.com/cloud/n1ql/n1ql-language-reference/transactions.html
+  *   Capella Data Tools still doesn’t support transaction: https://couchbasecloud.atlassian.net/browse/AV-54183
+  *   
+
+  
+
 ### Transactions in general with Python SDK
 
 ### Eventual Consistency
@@ -111,19 +120,66 @@ Example: If two transactions try to update the same bank account simultaneously,
 Example: After completing a transaction that credits $100 to Account B, durability ensures that this change is saved to disk and will not be lost even if the database system crashes immediately after. When the system restarts, Account B will still show the credited amount.
 Together, these ACID principles ensure that database transactions are processed reliably, keeping the data accurate and consistent, even in the face of errors, failures, or concurrent access.
 
+### What is the concept of RYOW (read your own write) in databases?
+RYOW (Read Your Own Write) is a consistency model in database systems that guarantees that once a client successfully completes a write operation, any subsequent read operations made by the same client will see the updated data. In simpler terms, it ensures that you always see the changes you've made to the data.   
+
+#### Why is RYOW important?
+
+Without RYOW, in distributed database systems with multiple replicas or eventual consistency models, a user might update data on one replica, but then read from another replica that hasn't yet received the update. This can lead to confusion and inconsistencies, as the user might see outdated information.   
+
+#### How is RYOW achieved?
+
+There are several techniques to implement RYOW:
+
+* Session Consistency: The system tracks the user's session and ensures that all reads and writes within that session are directed to the same replica or a replica that has the latest updates.   
+* Pinning: The user is "pinned" to a specific replica for a certain duration after a write operation. All subsequent reads from that user are directed to the pinned replica, ensuring they see their own writes.   
+* Versioning: Each write operation creates a new version of the data. The system tracks the version written by the user and ensures that subsequent reads by the same user retrieve the latest version they wrote.   
+
+#### Benefits of RYOW:
+* Improved user experience: Users see their changes reflected immediately, leading to a more intuitive and predictable experience.   
+* Simplified development: Developers can rely on RYOW to avoid complex logic for handling inconsistencies.
+* Data accuracy: Reduces the risk of users making decisions based on outdated information.
+
+In summary, RYOW is an important consistency guarantee in database systems that ensures users see their own writes, leading to a more consistent and user-friendly experience.   
+
+#### Couchbase achieves Read Your Own Write (RYOW) consistency through a combination of mechanisms:
+
+1.  Strong Consistency for Key-Value Operations:
+Couchbase's key-value operations inherently offer strong consistency. When you perform a write operation (like an insert or update) on a document using its key, the operation is replicated to a quorum of nodes before it is acknowledged as successful. This ensures that any subsequent read operation using the same key will retrieve the updated data.
+
+2.  Scan Consistency for SQL++ Queries:
+N1QL is Couchbase's query language. While key-value operations are strongly consistent, SQL++ queries introduce the concept of "scan consistency" because they might involve reading data from indexes that are updated asynchronously.   
+To achieve RYOW with SQL++, you can use the at_plus consistency level. This level guarantees that a query will see all mutations performed by the same client prior to the query. It works by tracking mutation tokens and ensuring the index is updated with all mutations before the query is executed.   
+
+3.  Durability and Failover:
+Couchbase's architecture, with its focus on in-memory operations and efficient replication, contributes to RYOW. Even in case of node failures, the data is replicated and durable, ensuring that your writes are not lost and remain accessible for subsequent reads.   
+
+4.  SDK Support:
+The Couchbase SDKs provide options to further enforce RYOW. For instance, you can configure the SDK to use specific consistency levels or to perform operations with synchronous durability requirements, ensuring that writes are persisted to disk before acknowledging success.
+
+In summary, Couchbase provides a robust foundation for achieving RYOW consistency:
+* Strong consistency for key-value operations ensures that you always read the latest data you wrote using the same key.
+* at_plus scan consistency level extends this guarantee to N1QL queries.
+* Durability and failover mechanisms ensure data availability and consistency even in case of failures.
+* SDK options provide fine-grained control over consistency levels and durability requirements.
+
+By leveraging these features, developers can build applications on Couchbase with confidence, knowing that their users will have a consistent and predictable experience.
 
 
 
 ## Links
-Transactions: https://docs.couchbase.com/server/current/learn/data/transactions.html
+* Transactions: https://docs.couchbase.com/server/current/learn/data/transactions.html
 
-Transaction Concepts: https://docs.couchbase.com/python-sdk/current/concept-docs/transactions.html
+* Transaction Concepts: https://docs.couchbase.com/python-sdk/current/concept-docs/transactions.html
 
-Using Transactions with Python SDK (How-To): https://docs.couchbase.com/python-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html
+* Using Transactions with Python SDK (How-To): https://docs.couchbase.com/python-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html
 
-Transactions Simulator: https://transactions.couchbase.com/
+* Transactions Simulator: https://transactions.couchbase.com/
 
-
+## YouTube Videos
+* [Demo] ACID Transactions in Couchbase: Balance Transfer (2024, 1:32): https://www.youtube.com/watch?v=6X0CrfkcJxE
+* Couchbase Transactions: The What and How of Going Transactional (2021, 36:26): https://www.youtube.com/watch?v=qG7YVjIgWfY
+* Couchbase Server N1QL Query Scan Consistency - NotBounded RequestPlus and AtPlus (2016, 5:42): https://www.youtube.com/watch?v=v7eTeKpaqG4
 
 
 ## Blogs
