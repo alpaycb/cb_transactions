@@ -80,13 +80,58 @@ python3 -m pip install couchbase==4.3.1
 
 ### Queries in Query Workbench
 
-## Links
-* SQL++ Support for Couchbase Transactions EE: https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/transactions.html
-* SQL++ Support for Couchbase Transactions Capella: https://docs.couchbase.com/cloud/n1ql/n1ql-language-reference/transactions.html
-  *   Capella Data Tools still doesn’t support transaction: https://couchbasecloud.atlassian.net/browse/AV-54183
-  *   
+# THEORY
 
-  
+## The CAP Theorem Explained
+The CAP Theorem, also known as Brewer's Theorem, applies to distributed systems, essentially stating that you can have at most two out of three desirable properties:
+
+1. Consistency: All nodes have the same data at the same time (strong consistency) or see an error if unavailable (eventual consistency).
+2. Availability: Every request receives a response, even if it might be stale data.
+3. Partition Tolerance: The system continues to operate even if network partitions occur, isolating nodes.
+
+In essence, you have to choose two:
+
+* CP (Consistent & Partition Tolerant): Data is always consistent across all nodes, but the system might become unavailable during network partitions. (Example: Blockchain)
+* AP (Available & Partition Tolerant): The system is always available even during partitions, but data might be temporarily inconsistent across nodes. (Example: Cassandra)
+* CA (Consistent & Available): Both consistency and availability are guaranteed, but this sacrifices partition tolerance. (Almost impossible to achieve in practice)
+Outcomes for RDBMS and NoSQL:
+
+### RDBMS (Relational Databases):
+* Typically prioritize CP.
+* Offer strong consistency guarantees, ensuring all nodes have the same data view.
+* May sacrifice availability during network partitions or high load.
+* Less suitable for large-scale, highly distributed systems.
+
+### NoSQL Databases:
+Offer various trade-offs depending on the specific type:
+* Eventual Consistency NoSQL (Cassandra, CouchDB): Prioritize AP. High availability even during partitions, but data might not be immediately consistent across nodes.
+* Strong Consistency NoSQL (DynamoDB, CockroachDB): Aim for CP, but achieve it through different mechanisms than RDBMS, potentially impacting other aspects like latency.
+* Provide flexibility and scalability for distributed systems.
+
+### Choosing the Right Approach:
+The best choice depends on your specific application needs. Consider factors like:
+
+* Data integrity requirements: How crucial is always having the latest data?
+* Availability needs: Can your system tolerate downtime?
+* Distribution and partitioning potential: Does your system face frequent network issues?
+* Performance requirements: How important are fast read/write speeds?
+
+Understanding the CAP Theorem helps you make informed decisions when designing and selecting database solutions for your distributed systems.
+
+## What Kind of database is Couchbase from CAP point of view?
+From a CAP perspective, Couchbase typically operates as a CP (Consistent & Partition Tolerant) database. This means it prioritizes maintaining data consistency across all nodes, even if it sacrifices some availability during network partitions.
+
+Here's a breakdown of how Couchbase approaches the CAP properties:
+
+* Consistency: Couchbase uses a strong replica model, ensuring all replicas within a vBucket receive updates before acknowledging a write. This guarantees strong consistency within the cluster.
+* Availability: During a network partition, writes become unavailable for that specific data until the partition heals. However, read requests can still be served from replicas, potentially providing eventual consistency (depending on configuration).
+* Partition Tolerance: Couchbase is designed to continue operating even when network partitions occur. It achieves this by isolating writes and maintaining consistency within each partition.
+
+However, it's important to note that there are nuances to consider:
+* Cluster vs. Cluster: While Couchbase within a cluster prioritizes CP, you can achieve AP across clusters using Continuous Data Replication (XDCR). This allows eventually consistent data exchange between geographically dispersed clusters.
+* Configurability: Couchbase offers some configurability in its consistency model. You can choose between strict majority write requirements for strong consistency or relaxed consistency mechanisms for higher availability in certain situations.
+
+Overall, understanding Couchbase's CAP trade-offs is crucial for making informed decisions about your database architecture and data access patterns. Its default CP focus ensures strong consistency within a cluster, but consider your specific needs when scaling across larger, geographically distributed environments.
 
 ### Transactions in general with Python SDK
 
@@ -158,10 +203,10 @@ Couchbase's architecture, with its focus on in-memory operations and efficient r
 The Couchbase SDKs provide options to further enforce RYOW. For instance, you can configure the SDK to use specific consistency levels or to perform operations with synchronous durability requirements, ensuring that writes are persisted to disk before acknowledging success.
 
 In summary, Couchbase provides a robust foundation for achieving RYOW consistency:
-* Strong consistency for key-value operations ensures that you always read the latest data you wrote using the same key.
-* at_plus scan consistency level extends this guarantee to N1QL queries.
-* Durability and failover mechanisms ensure data availability and consistency even in case of failures.
-* SDK options provide fine-grained control over consistency levels and durability requirements.
+* __Strong consistency__ for key-value operations ensures that you always read the latest data you wrote using the same key.
+* __at_plus__ scan consistency level extends this guarantee to N1QL queries.
+* __Durability__ and failover mechanisms ensure data availability and consistency even in case of failures.
+* __SDK options__ provide fine-grained control over consistency levels and durability requirements.
 
 By leveraging these features, developers can build applications on Couchbase with confidence, knowing that their users will have a consistent and predictable experience.
 
@@ -176,6 +221,10 @@ By leveraging these features, developers can build applications on Couchbase wit
 
 * Transactions Simulator: https://transactions.couchbase.com/
 
+* SQL++ Support for Couchbase Transactions EE: https://docs.couchbase.com/server/current/n1ql/n1ql-language-reference/transactions.html
+  * SQL++ Support for Couchbase Transactions Capella: https://docs.couchbase.com/cloud/n1ql/n1ql-language-reference/transactions.html
+  *   Capella Data Tools still doesn’t support transaction: https://couchbasecloud.atlassian.net/browse/AV-54183
+
 ## YouTube Videos
 * [Demo] ACID Transactions in Couchbase: Balance Transfer (2024, 1:32): https://www.youtube.com/watch?v=6X0CrfkcJxE
 * Couchbase Transactions: The What and How of Going Transactional (2021, 36:26): https://www.youtube.com/watch?v=qG7YVjIgWfY
@@ -183,4 +232,4 @@ By leveraging these features, developers can build applications on Couchbase wit
 
 
 ## Blogs
-Understanding Understanding How Transactions Work in Cross Data Center Replications (XDCR): https://www.couchbase.com/blog/couchbase-xdcr-transactions/
+* Understanding Understanding How Transactions Work in Cross Data Center Replications (XDCR): https://www.couchbase.com/blog/couchbase-xdcr-transactions/
